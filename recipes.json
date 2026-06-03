@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Banana Bread",
+    "servings": 4.0,
+    "ingredients": [
+      {
+        "name": "banana",
+        "quantity": "4"
+      },
+      {
+        "name": "bread",
+        "quantity": "3"
+      }
+    ],
+    "instructions": "mix banana and bread"
+  }
+]

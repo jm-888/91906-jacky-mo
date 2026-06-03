@@ -77,6 +77,7 @@ def save_recipes(recipe_list):
     with open(FILE_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
+
 class RecipeApp:
     """Main application window."""
 
@@ -104,7 +105,7 @@ class RecipeApp:
 
         tk.Button(top, text="+ Add Recipe",
                   command=self.open_add_screen).pack(side="right")
-        
+
         search_frame = tk.Frame(self.root, padx=14, pady=2)
         search_frame.pack(fill="x")
 
@@ -118,7 +119,7 @@ class RecipeApp:
 
         tk.Button(search_frame, text="Search",
                   command=self.do_search).pack(side="left", padx=(0, 4))
-        
+
         # Clear Search button
         tk.Button(search_frame, text="Clear",
                   command=self.clear_search).pack(side="left")
@@ -150,6 +151,7 @@ class RecipeApp:
 
         self.refresh_list()
 
+
     def refresh_list(self):
         """Update the listbox with filtered recipes."""
         self.listbox.delete(0, tk.END)
@@ -179,13 +181,95 @@ class RecipeApp:
         self.filtered_list = list(self.recipe_list)
         self.refresh_list()
 
+
     def open_add_screen(self):
         """Open the add recipe screen."""
         pass
 
+
+    # Gets the selected recipe and opens the detail window
+
+
     def open_detail_screen(self, event=None):
-        """Open the recipe detail screen."""
-        pass
+        """Open the detail screen for whichever recipe is selected."""
+        sel = self.listbox.curselection()
+        if not sel:
+            return
+        index  = sel[0]
+        recipe = self.filtered_list[index]
+        DetailScreen(self.root, recipe, self)
+
+
+
+
+class DetailScreen(tk.Toplevel):
+    """Pop-up window showing a full recipe."""
+
+    def __init__(self, parent, recipe, app):
+        super().__init__(parent)
+        self.recipe = recipe
+        self.app    = app
+
+        self.title(recipe.name)
+        self.geometry("500x570")
+        self.minsize(420, 420)
+        self.grab_set()   # blocks the main window while this is open
+
+        self._build()
+
+    # doubletap a recipe to see all the info
+
+
+    def _build(self):
+        """Build every widget on the detail screen."""
+
+        # Recipe name at the top
+        header = tk.Frame(self, padx=14, pady=10)
+        header.pack(fill="x")
+        tk.Label(header, text=self.recipe.name,
+                 font=("Helvetica", 16, "bold"),
+                 wraplength=440, justify="left").pack(side="left")
+
+        # Ingredient list its readonly so user cant edit it
+        ing_frame = tk.LabelFrame(self, text="Ingredients", padx=10, pady=8)
+        ing_frame.pack(fill="x", padx=14, pady=(0, 8))
+
+        self.ing_text = tk.Text(
+            ing_frame, height=8, state="disabled",
+            wrap="word", font=("Helvetica", 11),
+        )
+        self.ing_text.pack(fill="both")
+        self._show_ingredients(self.recipe.ingredients)
+
+        # Instructions scrollable and readonly
+        inst_frame = tk.LabelFrame(self, text="Instructions", padx=10, pady=8)
+        inst_frame.pack(fill="both", expand=True, padx=14, pady=(0, 8))
+
+        inst_scroll = tk.Scrollbar(inst_frame)
+        inst_scroll.pack(side="right", fill="y")
+
+        inst_text = tk.Text(
+            inst_frame,
+            yscrollcommand=inst_scroll.set,
+            state="disabled",
+            wrap="word",
+            font=("Helvetica", 11),
+        )
+        inst_text.pack(fill="both", expand=True)
+        inst_scroll.config(command=inst_text.yview)
+
+        inst_text.config(state="normal")
+        inst_text.insert("1.0", self.recipe.instructions or "(no instructions added)")
+        inst_text.config(state="disabled")
+
+
+    def _show_ingredients(self, ingredients):
+        """Fill the ingredient text box with the ingredient list."""
+        self.ing_text.config(state="normal")
+        self.ing_text.delete("1.0", tk.END)
+        for ing in ingredients:
+            self.ing_text.insert(tk.END, f"  •  {ing['quantity']}   {ing['name']}\n")
+        self.ing_text.config(state="disabled")
 
 
 if __name__ == "__main__":
