@@ -162,7 +162,7 @@ class RecipeApp:
             self.listbox.insert(tk.END, "  No recipes found.")
 
 
-    def do_search(self, event=None):
+    def do_search(self):
         """Filter recipes by ingredient name."""
         term = self.search_var.get().strip().lower()
         if not term:
@@ -182,15 +182,39 @@ class RecipeApp:
         self.refresh_list()
 
 
+
+    def open_edit_screen(self):
+        """Open edit screen for an existing recipe."""
+        messagebox.showinfo(
+            "Coming Soon",
+            "Edit screen not implemented yet."
+        )
+
+    def delete_recipe(self, recipe):
+        """Delete recipe after confirmation."""
+        confirmed = messagebox.askyesno(
+            "Delete Recipe",
+            f"Delete '{recipe.name}' permanently?"
+        )
+
+        if confirmed:
+            self.recipe_list.remove(recipe)
+
+            save_recipes(self.recipe_list)
+
+            self.clear_search()
+
+            return True
+
+        return False
+
+
+    # Gets the selected recipe and opens the detail window
     def open_add_screen(self):
         """Open the add recipe screen."""
         pass
 
-
-    # Gets the selected recipe and opens the detail window
-
-
-    def open_detail_screen(self, event=None):
+    def open_detail_screen(self):
         """Open the detail screen for whichever recipe is selected."""
         sel = self.listbox.curselection()
         if not sel:
