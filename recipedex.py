@@ -184,11 +184,11 @@ class RecipeApp:
 
 
     def open_edit_screen(self):
-        """Open edit screen for an existing recipe."""
-        messagebox.showinfo(
-            "Coming Soon",
-            "Edit screen not implemented yet."
-        )
+         """Open edit screen for an existing recipe."""
+    messagebox.showinfo(
+        "Edit Recipe",
+        "Editing recipes will be added later."
+    )
 
     def delete_recipe(self, recipe):
         """Delete recipe after confirmation."""
@@ -214,7 +214,7 @@ class RecipeApp:
         """Open the add recipe screen."""
         pass
 
-    def open_detail_screen(self):
+    def open_detail_screen(self, event=None):
         """Open the detail screen for whichever recipe is selected."""
         sel = self.listbox.curselection()
         if not sel:
@@ -286,6 +286,27 @@ class DetailScreen(tk.Toplevel):
         inst_text.insert("1.0", self.recipe.instructions or "(no instructions added)")
         inst_text.config(state="disabled")
 
+        btn_frame = tk.Frame(self, padx=14, pady=10)
+        btn_frame.pack(fill="x")
+
+        tk.Button(
+            btn_frame,
+            text="Back",
+            command=self.destroy
+        ).pack(side="left")
+
+        tk.Button(
+            btn_frame,
+            text="Delete",
+            command=self.do_delete
+        ).pack(side="right")
+
+        tk.Button(
+            btn_frame,
+            text="Edit",
+            command=self.do_edit
+        ).pack(side="right", padx=(0, 6))
+
 
     def _show_ingredients(self, ingredients):
         """Fill the ingredient text box with the ingredient list."""
@@ -294,6 +315,34 @@ class DetailScreen(tk.Toplevel):
         for ing in ingredients:
             self.ing_text.insert(tk.END, f"  •  {ing['quantity']}   {ing['name']}\n")
         self.ing_text.config(state="disabled")
+
+    def do_scale(self):
+        try:
+            new_servings = float(self.serving_var.get())
+
+            if new_servings <= 0:
+                raise ValueError
+
+            scaled = self.recipe.scale(new_servings)
+
+            self._show_ingredients(scaled)
+
+        except ValueError:
+            messagebox.showerror(
+                "Invalid Input",
+                "Enter a positive number."
+            )
+
+
+    def do_delete(self):
+        deleted = self.app.delete_recipe(self.recipe)
+
+        if deleted:
+            self.destroy()
+
+
+    def do_edit(self):
+        self.app.open_edit_screen()
 
 
 if __name__ == "__main__":
