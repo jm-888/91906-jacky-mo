@@ -253,6 +253,36 @@ class DetailScreen(tk.Toplevel):
         tk.Label(header, text=self.recipe.name,
                  font=("Helvetica", 16, "bold"),
                  wraplength=440, justify="left").pack(side="left")
+        
+        scale_frame = tk.LabelFrame(self, text="Servings", padx=10, pady=8)
+
+        scale_frame.pack(fill="x", padx=14, pady=(0, 8))
+
+        tk.Label(
+            scale_frame,
+            text=f"Original: {self.recipe.servings}"
+        ).pack(side="left", padx=(0, 8))
+
+        self.serving_var = tk.StringVar(
+            value=str(self.recipe.servings)
+        )
+
+        tk.Entry(
+            scale_frame,
+            textvariable=self.serving_var,
+            width=6
+        ).pack(side="left", padx=4)
+
+        tk.Button(
+            scale_frame,
+            text="Scale",
+            command=self.do_scale
+        ).pack(side="left")
+
+
+        self.scale_error_var = tk.StringVar()
+        tk.Label(scale_frame, textvariable=self.scale_error_var,
+                 fg="red", font=("Helvetica", 9)).pack(side="left", padx=8)
 
         # Ingredient list its readonly so user cant edit it
         ing_frame = tk.LabelFrame(self, text="Ingredients", padx=10, pady=8)
