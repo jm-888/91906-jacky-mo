@@ -115,7 +115,7 @@ class RecipeApp:
         self.search_entry = tk.Entry(search_frame,
                                      textvariable=self.search_var, width=28)
         self.search_entry.pack(side="left", padx=(0, 6))
-        self.search_entry.bind("<Return>", self.do_search)
+        self.search_entry.bind("<Return>", lambda event: self.do_search())
 
         tk.Button(search_frame, text="Search",
                   command=self.do_search).pack(side="left", padx=(0, 4))
@@ -147,7 +147,7 @@ class RecipeApp:
         scrollbar.config(command=self.listbox.yview)
 
         self.listbox.bind("<Double-Button-1>", self.open_detail_screen)
-        self.listbox.bind("<Return>",          self.open_detail_screen)
+        self.listbox.bind("<Return>", self.open_detail_screen)
 
         self.refresh_list()
 
@@ -181,14 +181,11 @@ class RecipeApp:
         self.filtered_list = list(self.recipe_list)
         self.refresh_list()
 
+    def open_edit_screen(self, recipe):
+        """Open the Edit screen pre-filled with an existing recipe."""
+        AddEditScreen(self.root, recipe=recipe, app=self)
 
 
-    def open_edit_screen(self):
-         """Open edit screen for an existing recipe."""
-    messagebox.showinfo(
-        "Edit Recipe",
-        "Editing recipes will be added later."
-    )
 
     def delete_recipe(self, recipe):
         """Delete recipe after confirmation."""
@@ -211,8 +208,8 @@ class RecipeApp:
 
     # Gets the selected recipe and opens the detail window
     def open_add_screen(self):
-        """Open the add recipe screen."""
-        pass
+        """Open blank Add Recipe screen to create a new recipe."""
+        AddEditScreen(self.root, recipe=None, app=self)
 
     def open_detail_screen(self, event=None):
         """Open the detail screen for whichever recipe is selected."""
@@ -349,30 +346,45 @@ class DetailScreen(tk.Toplevel):
     def do_scale(self):
         try:
             new_servings = float(self.serving_var.get())
-
             if new_servings <= 0:
                 raise ValueError
-
             scaled = self.recipe.scale(new_servings)
-
             self._show_ingredients(scaled)
-
         except ValueError:
             messagebox.showerror(
                 "Invalid Input",
                 "Enter a positive number."
             )
 
+    def do_edit(self):
+        """Close this window and open the Edit screen."""
+        self.destroy()
+        self.app.open_edit_screen(self.recipe)
 
     def do_delete(self):
+        """Delete this recipe and close the window if confirmed."""
         deleted = self.app.delete_recipe(self.recipe)
-
         if deleted:
             self.destroy()
 
+class AddEditScreen(tk.Toplevel):
+    """
+    Scrollable form for adding a new recipe or editing an existing one.
+    Pass recipe=None to add, or a Recipe object to edit.
+    """
 
-    def do_edit(self):
-        self.app.open_edit_screen()
+    def __init__(self, parent, recipe, app):
+        super().__init__(parent)
+        self.recipe   = recipe   # None = adding,  Recipe object = editing
+        self.app      = app
+        self.ing_rows = []       # keeps track of ingredient row widgets
+
+        self.title("Edit Recipe" if recipe else "Add Recipe")
+        self.geometry("540x620")
+        self.minsize(460, 500)
+        self.grab_set()
+
+        self._build_scrollable_form()
 
 
 if __name__ == "__main__":
