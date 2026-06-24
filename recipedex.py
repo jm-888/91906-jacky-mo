@@ -386,6 +386,35 @@ class AddEditScreen(tk.Toplevel):
 
         self._build_scrollable_form()
 
+    def _build_scrollable_form(self):
+        """Wrap the form in a Canvas so it scrolls on small screens """
+        canvas    = tk.Canvas(self, borderwidth=0, highlightthickness=0)
+        scrollbar = tk.Scrollbar(self, orient="vertical", command=canvas.yview)
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        scrollbar.pack(side="right", fill="y")
+        canvas.pack(fill="both", expand=True)
+
+        self.form     = tk.Frame(canvas, padx=14, pady=10)
+        self._form_id = canvas.create_window((0, 0), window=self.form, anchor="nw")
+
+        self.form.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        canvas.bind(
+            "<Configure>",
+            lambda e: canvas.itemconfig(self._form_id, width=e.width)
+        )
+
+        # lets user scroll with scrollwheel when cursor is hovering 
+        canvas.bind_all("<MouseWheel>",
+                        lambda e: canvas.yview_scroll(int(-1*(e.delta/120)), "units"))
+        canvas.bind_all("<Button-4>", lambda e: canvas.yview_scroll(-1, "units"))
+        canvas.bind_all("<Button-5>", lambda e: canvas.yview_scroll( 1, "units"))
+
+        self._build_form_widgets()
+
 
 if __name__ == "__main__":
     root = tk.Tk()
