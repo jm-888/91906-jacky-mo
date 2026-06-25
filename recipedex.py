@@ -93,6 +93,8 @@ class RecipeApp:
         self._build_main_screen()
 
 
+
+
     def _build_main_screen(self):
         """Build the main screen widgets."""
 
@@ -414,6 +416,23 @@ class AddEditScreen(tk.Toplevel):
         canvas.bind_all("<Button-5>", lambda e: canvas.yview_scroll( 1, "units"))
 
         self._build_form_widgets()
+
+    def _build_form_widgets(self):
+        """Add all the labels and buttons to self.form"""
+
+        # Recipe name
+        tk.Label(self.form, text="Recipe name *",
+                 font=("Helvetica", 11, "bold")).pack(anchor="w")
+        self.name_var = tk.StringVar()
+        tk.Entry(self.form, textvariable=self.name_var,
+                 width=42).pack(anchor="w", pady=(2, 12))
+
+        # Default servings
+        tk.Label(self.form, text="Default servings *",
+                 font=("Helvetica", 11, "bold")).pack(anchor="w")
+        self.servings_var = tk.StringVar(value="4")
+        tk.Entry(self.form, textvariable=self.servings_var,
+                 width=10).pack(anchor="w", pady=(2, 12))
 
 
 if __name__ == "__main__":
