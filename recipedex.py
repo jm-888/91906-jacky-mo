@@ -433,7 +433,61 @@ class AddEditScreen(tk.Toplevel):
         self.servings_var = tk.StringVar(value="4")
         tk.Entry(self.form, textvariable=self.servings_var,
                  width=10).pack(anchor="w", pady=(2, 12))
+        
+        tk.Label(self.form, text="Ingredients *",
+                 font=("Helvetica", 11, "bold")).pack(anchor="w")
 
+        # Column headers
+        col_header = tk.Frame(self.form)
+        col_header.pack(fill="x", pady=(2, 0))
+        tk.Label(col_header, text="Ingredient name", width=24, anchor="w",
+                 font=("Helvetica", 9), fg="grey").pack(side="left")
+        tk.Label(col_header, text="Quantity",        width=14, anchor="w",
+                 font=("Helvetica", 9), fg="grey").pack(side="left")
+
+        # New rows are packed inside this container
+        self.ing_container = tk.Frame(self.form)
+        self.ing_container.pack(fill="x")
+
+        # Start with one blank row
+        self.add_ingredient_row()
+
+        tk.Button(self.form, text="+ Add ingredient",
+                  command=self.add_ingredient_row).pack(anchor="w", pady=(6, 12))
+
+
+        # Instructions
+        tk.Label(self.form, text="Instructions",
+                 font=("Helvetica", 11, "bold")).pack(anchor="w")
+        self.inst_text = tk.Text(self.form, height=8, wrap="word",
+                                 font=("Helvetica", 11))
+        self.inst_text.pack(fill="x", pady=(2, 12))
+
+
+        
+
+    def add_ingredient_row(self, name="", qty=""):
+        """
+        Add one ingredient row 
+        Prefill name and quantity when called from _prefill (editing mode).
+        """
+        row      = tk.Frame(self.ing_container)
+        row.pack(fill="x", pady=1)
+
+        name_var = tk.StringVar(value=name)
+        qty_var  = tk.StringVar(value=qty)
+
+        tk.Entry(row, textvariable=name_var, width=24).pack(side="left", padx=(0, 6))
+        tk.Entry(row, textvariable=qty_var,  width=14).pack(side="left", padx=(0, 6))
+
+        def remove_this_row():
+            # Always keep one row so the user can't remove all of them
+            if len(self.ing_rows) > 1:
+                self.ing_rows.remove((name_var, qty_var, row))
+                row.destroy()
+
+        tk.Button(row, text="✕", command=remove_this_row, width=2).pack(side="left")
+        self.ing_rows.append((name_var, qty_var, row))
 
 if __name__ == "__main__":
     root = tk.Tk()
