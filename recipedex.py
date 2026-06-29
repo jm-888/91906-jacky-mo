@@ -464,6 +464,24 @@ class AddEditScreen(tk.Toplevel):
         self.inst_text.pack(fill="x", pady=(2, 12))
 
 
+
+        self.error_var = tk.StringVar()
+        tk.Label(self.form, textvariable=self.error_var,
+                 fg="red", wraplength=460, justify="left").pack(anchor="w")
+
+        # Save / Cancel buttons
+        btn_frame = tk.Frame(self.form)
+        btn_frame.pack(fill="x", pady=(8, 4))
+
+        tk.Button(btn_frame, text="Save",
+                  command=self.do_save, width=10).pack(side="left", padx=(0, 8))
+        tk.Button(btn_frame, text="Cancel",
+                  command=self.destroy, width=10).pack(side="left")
+
+        tk.Label(self.form, text="* required",
+                 font=("Helvetica", 9), fg="grey").pack(anchor="w", pady=(4, 0))
+
+
         
 
     def add_ingredient_row(self, name="", qty=""):
@@ -481,13 +499,67 @@ class AddEditScreen(tk.Toplevel):
         tk.Entry(row, textvariable=qty_var,  width=14).pack(side="left", padx=(0, 6))
 
         def remove_this_row():
-            # Always keep one row so the user can't remove all of them
+            # Always keeps one row so the user can't remove all of them
             if len(self.ing_rows) > 1:
                 self.ing_rows.remove((name_var, qty_var, row))
                 row.destroy()
 
         tk.Button(row, text="✕", command=remove_this_row, width=2).pack(side="left")
         self.ing_rows.append((name_var, qty_var, row))
+
+    def do_save(self):
+        """Validate all fields then add or update the recipe."""
+        self.error_var.set("") # clear any previous error
+
+        # Name must not be empty
+        name = self.name_var.get().strip()
+        if not name:
+            self.error_var.set("Recipe name cannot be empty.")
+            return
+
+        # Servings must be a positive number
+        try:
+            servings = float(self.servings_var.get())
+            if servings <= 0:
+                raise ValueError
+        except ValueError:
+            self.error_var.set("Servings must be a positive number (e.g. 4).")
+            return
+
+        # Collect ingredient rows skip completely blank rows silently
+        ingredients = []
+        for name_var, qty_var, _ in self.ing_rows:
+            ing_name = name_var.get().strip()
+            qty      = qty_var.get().strip()
+            if ing_name:
+                ingredients.append({"name": ing_name, "quantity": qty})
+
+        if not ingredients:
+            self.error_var.set("Please add at least one ingredient.")
+            return
+
+        # Instructions are optional so no validation needed
+        instructions = self.inst_text.get("1.0", "end-1c").strip()
+
+        # Update existing Recipe or create a new one
+        if self.recipe:
+            # Editing, update the existing object
+            self.recipe.name         = name
+            self.recipe.servings     = servings
+            self.recipe.ingredients  = ingredients
+            self.recipe.instructions = instructions
+        else:
+            # Adding, create a new Recipe and append to the master list
+            new_recipe = Recipe(name, servings, ingredients, instructions)
+            self.app.recipe_list.append(new_recipe)
+
+        # 6. Save to file and refresh the main screen
+        save_recipes(self.app.recipe_list)
+        self.app.clear_search()
+        self.destroy()
+
+
+
 
 if __name__ == "__main__":
     root = tk.Tk()

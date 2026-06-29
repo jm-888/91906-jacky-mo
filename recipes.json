@@ -13,5 +13,28 @@
       }
     ],
     "instructions": "mix banana and bread"
+  },
+  {
+    "name": "Adobo",
+    "servings": 4.0,
+    "ingredients": [
+      {
+        "name": "chicken thighs",
+        "quantity": "3"
+      },
+      {
+        "name": "whole black peppercorns",
+        "quantity": "2"
+      },
+      {
+        "name": "rice vinegar or white vinegar",
+        "quantity": "1cup"
+      },
+      {
+        "name": "soy sauce (Filipino brand recommended)",
+        "quantity": "\u00bd cup"
+      }
+    ],
+    "instructions": "cook chicken then mix it with the sauces"
   }
 ]
