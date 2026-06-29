@@ -288,8 +288,8 @@ class DetailScreen(tk.Toplevel):
         ing_frame.pack(fill="x", padx=14, pady=(0, 8))
 
         self.ing_text = tk.Text(
-            ing_frame, height=8, state="disabled",
-            wrap="word", font=("Helvetica", 11),
+            ing_frame, height=6, state="disabled",
+            wrap="word", font=("Helvetica", 11),  
         )
         self.ing_text.pack(fill="both")
         self._show_ingredients(self.recipe.ingredients)
@@ -382,11 +382,14 @@ class AddEditScreen(tk.Toplevel):
         self.ing_rows = []       # keeps track of ingredient row widgets
 
         self.title("Edit Recipe" if recipe else "Add Recipe")
-        self.geometry("540x620")
+        self.geometry("500x700")
         self.minsize(460, 500)
         self.grab_set()
 
         self._build_scrollable_form()
+        
+        if recipe:
+            self._prefill()
 
     def _build_scrollable_form(self):
         """Wrap the form in a Canvas so it scrolls on small screens """
@@ -506,6 +509,21 @@ class AddEditScreen(tk.Toplevel):
 
         tk.Button(row, text="✕", command=remove_this_row, width=2).pack(side="left")
         self.ing_rows.append((name_var, qty_var, row))
+
+    def _prefill(self):
+        """Fill every field with the existing recipe's data."""
+        self.name_var.set(self.recipe.name)
+        self.servings_var.set(str(int(self.recipe.servings)))
+        self.inst_text.insert("1.0", self.recipe.instructions)
+
+        # Remove the default blank row first
+        for _, _, frame in self.ing_rows:
+            frame.destroy()
+        self.ing_rows.clear()
+
+        # Add one row per ingredient thats already there, prefilled
+        for ing in self.recipe.ingredients:
+            self.add_ingredient_row(name=ing["name"], qty=ing["quantity"])
 
     def do_save(self):
         """Validate all fields then add or update the recipe."""
